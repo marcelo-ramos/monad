@@ -1,0 +1,7 @@
+This is the code companion to my one act, one man show,
+_Monads & Gonads_.
+
+It contains two JavaScript files:
+
+    monad.js    for making monads
+    vow.js      for making promises
