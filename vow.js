@@ -47,7 +47,7 @@ var VOW = (function () {
             ? function (value) {
                 try {
                     var result = func(value);
-                    if (resolver(result.is_promise !== true)) {
+                    if (result.is_promise !== true) {
                         resolver(result);
                     } else {
                         result.when(resolver, breaker);
