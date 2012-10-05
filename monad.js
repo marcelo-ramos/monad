@@ -54,7 +54,7 @@ function MONAD(modifier) {
         var monad = Object.create(prototype);
 
 // Add a bind method that will deliver the unit's value parameter to a
-// function/
+// function. In some mythologies it is called 'pipe' or '>>='.
 
         monad.bind = function (func, args) {
 
