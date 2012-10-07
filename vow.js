@@ -1,6 +1,6 @@
 // vow.js
 // Douglas Crockford
-// 2012-10-04
+// 2012-10-06
 
 // Public Domain
 
@@ -33,30 +33,40 @@ var VOW = (function () {
         breaker     // A break resolve function to be used if func fails
     ) {
 
-// enqueue is a helper function used by .when. It will append a resolution to
-// either the keepers queue or the breakers queue. If func is a function then
-// push a new resolution function that will attempt to pass the result of the
-// func to the resolver function; if that fails, then call the breaker function
-// to recover. If func is not a function (which could happen if .when was called
-// with missing arguments) then push the resolver function itself, which has the
-// effect of passing the value down to the next .when, if the whens are chained.
-// If the result of func is a promise, then the resolver or breaker will be
-// called when that promise resolves.
+// enqueue is a helper function used by .when. It will append a resovler to
+// either the keepers queue or the breakers queue.
 
-        queue[queue.length] = typeof func === 'function'
-            ? function (value) {
+        queue[queue.length] = typeof func !== 'function'
+
+// If func is not a function, push the resolver so that the value passes to
+// the next .when.
+
+            ? resolver
+
+// If the func is a function, push a function that calls func with a value.
+// The result can be a promise, or not a promise, or an exception.
+
+            : function (value) {
                 try {
                     var result = func(value);
-                    if (result.is_promise !== true) {
-                        resolver(result);
-                    } else {
+
+// If the result is a promise, then register our resolver with that promise.
+
+                    if (result && result.is_promise === true) {
                         result.when(resolver, breaker);
+                    } else {
+
+// But if it is not a promise, then use the result to resolve our promise.
+
+                        resolver(result);
                     }
+
+// But if func throws an exception, then break our promise.
+
                 } catch (e) {
                     breaker(e);
                 }
-            }
-            : resolver;
+            };
     }
 
     function enlighten(queue, fate) {
