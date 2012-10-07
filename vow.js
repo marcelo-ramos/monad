@@ -6,7 +6,7 @@
 
 /*jslint es5: true */
 
-var setTimeout, setImmediate;
+/*global setTimeout, setImmediate */
 
 if (typeof setImmediate !== 'function') {
     setImmediate = function setImmediate(func, param) {
