@@ -1,12 +1,15 @@
 // vow.js
 // Douglas Crockford
-// 2012-10-06
+// 2012-10-07
 
 // Public Domain
 
 /*jslint es5: true */
 
 /*global setTimeout, setImmediate */
+
+
+// If this system does not have setImmediate, then simulate it with setTimeout.
 
 if (typeof setImmediate !== 'function') {
     setImmediate = function setImmediate(func, param) {
@@ -23,7 +26,7 @@ var VOW = (function () {
 
 // The VOW object contains a .make function that is used to make vows.
 // It may also contain other useful functions.
-// In some mythologies, vow is called defer.
+// In some mythologies, 'VOW' is called 'deferrer'.
 
 
     function enqueue(
@@ -39,7 +42,7 @@ var VOW = (function () {
         queue[queue.length] = typeof func !== 'function'
 
 // If func is not a function, push the resolver so that the value passes to
-// the next .when.
+// the next cascaded .when.
 
             ? resolver
 
@@ -54,10 +57,10 @@ var VOW = (function () {
 
                     if (result && result.is_promise === true) {
                         result.when(resolver, breaker);
-                    } else {
 
 // But if it is not a promise, then use the result to resolve our promise.
 
+                    } else {
                         resolver(result);
                     }
 
@@ -68,6 +71,7 @@ var VOW = (function () {
                 }
             };
     }
+
 
     function enlighten(queue, fate) {
 
@@ -95,8 +99,8 @@ var VOW = (function () {
             function herald(state, value, queue) {
 
 // The herald function is a helper function of break and keep.
-// It seals the promise's fate, updates its status, enlightens one of the
-// queues, and empties both queues.
+// It seals the promise's fate, updates its status, enlightens
+// one of the queues, and empties both queues.
 
                 if (status !== 'pending') {
                     throw "overpromise";
@@ -124,20 +128,23 @@ var VOW = (function () {
                     herald('kept', value, keepers);
                 },
                 promise: {
+
+// The promise is an object with a .when method.
+
                     is_promise: true,
 
 // The .when method is the promise monad's bind. The .when method can take two
-// optional functions. One of those functions will be called, depending on the
+// optional functions. One of those functions may be called, depending on the
 // promise's resolution.
 
                     when: function (kept, broken) {
 
-// Make a new vow. The promise will be the return value.
+// Make a new vow. The promise will be the return value of .when.
 
                         var vow = make();
                         switch (status) {
 
-// If the promise is still pending, then enqueue both arguments.
+// If the promise is still pending, then enqueue both kept and broken.
 
                         case 'pending':
                             enqueue(keepers,  kept,   vow.keep,  vow.break);
@@ -145,7 +152,7 @@ var VOW = (function () {
                             break;
 
 // If the promise has already been kept, then enqueue only the kept function,
-// and enlighten.
+// and enlighten it.
 
                         case 'kept':
                             enqueue(keepers, kept, vow.keep, vow.break);
@@ -153,7 +160,7 @@ var VOW = (function () {
                             break;
 
 // If the promise has already been broken, then enqueue only the broken
-// function, and enlighten.
+// function, and enlighten it.
 
                         case 'broken':
                             enqueue(breakers, broken, vow.break, vow.break);
@@ -172,8 +179,8 @@ var VOW = (function () {
 
             var remaining = array.length, results = [], vow = VOW.make();
 
-            if (remaining === 0) {
-                vow.keep(results);
+            if (!remaining) {
+                vow.break(array);
             } else {
                 array.forEach(function (promise, i) {
                     promise.when(function (value) {
@@ -193,7 +200,8 @@ var VOW = (function () {
         first: function every(array) {
 
 // The first function takes an array of promises and returns a promise to
-// deliver the first observed result, or a broken promise if none are kept.
+// deliver the first observed kept promise, or a broken promise if none of
+// the promises are kept.
 
             var found = false, remaining = array.length, vow = VOW.make();
 
@@ -205,7 +213,7 @@ var VOW = (function () {
             }
 
             if (remaining === 0) {
-                vow.break('first');
+                vow.break(array);
             } else {
                 array.forEach(function (promise) {
                     promise.when(function (value) {
@@ -234,7 +242,7 @@ var VOW = (function () {
                 }
             }
 
-            if (remaining === 0) {
+            if (!remaining) {
                 vow.keep(results);
             } else {
                 array.forEach(function (promise, i) {
