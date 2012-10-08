@@ -1,6 +1,6 @@
 // monad.js
 // Douglas Crockford
-// 2012-10-04
+// 2012-10-07
 
 // Public Domain
 
@@ -53,15 +53,15 @@ function MONAD(modifier) {
 
         var monad = Object.create(prototype);
 
-// Add a bind method that will deliver the unit's value parameter to a
-// function. In some mythologies it is called 'pipe' or '>>='.
+// In some mythologies 'bind' is called 'pipe' or '>>='.
+// The bind method that will deliver the unit's value parameter to a function.
 
         monad.bind = function (func, args) {
 
 // bind takes a function and an optional array of arguments. It calls that
 // function passing the monad's value and bind's optional array of args.
 
-// With ES6, this horrible statement can be replaced with
+// With ES6, this horrible return statement can be replaced with
 
 //          return func(value, ...args);
 
@@ -104,7 +104,7 @@ function MONAD(modifier) {
 
         prototype[name] = function () {
             var result = this.bind(func, arguments);
-            return result.is_monad === true ? result : unit(result);
+            return result && result.is_monad === true ? result : unit(result);
         };
         return unit;
     };
