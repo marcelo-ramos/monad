@@ -1,6 +1,6 @@
 // vow.js
 // Douglas Crockford
-// 2012-10-07
+// 2012-10-12
 
 // Public Domain
 
@@ -197,7 +197,7 @@ var VOW = (function () {
             }
             return vow.promise;
         },
-        first: function every(array) {
+        first: function first(array) {
 
 // The first function takes an array of promises and returns a promise to
 // deliver the first observed kept promise, or a broken promise if none of
