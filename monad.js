@@ -1,28 +1,27 @@
 // monad.js
 // Douglas Crockford
-// 2012-10-07
+// 2012-10-17
 
 // Public Domain
 
-// The MONAD function is a factory that produces monad constructor functions.
+// The MONAD function is a macroid that produces monad constructor functions.
 // It can take an optional modifier function, which is a function that is
 // allowed to modify new monads at the end of the construction processes.
 
 // A monad constructor (sometimes called 'unit' or 'return' in some mythologies)
-// comes with three methods, lift, lift_value, and method, which can add
+// comes with three methods, lift, lift_value, and method, all of which can add
 // methods and properties to the monad's prototype.
 
 // A monad has a 'bind' method that takes a function that receives a value and
-// is expected to return a monad.
+// is usually expected to return a monad.
 
-//    var unit = MONAD();
-//    var monad = unit("Hello world.");
+//    var identity = MONAD();
+//    var monad = identity("Hello world.");
 //    monad.bind(alert);
 
 //    var ajax = MONAD()
 //        .lift('alert', alert);
 //    var monad = ajax("Hello world.");
-//    monad.bind(alert);
 //    monad.alert();
 
 //    var maybe = MONAD(function (monad, value) {
@@ -39,13 +38,13 @@
 function MONAD(modifier) {
     'use strict';
 
-// Each construct has a monad prototype. The prototype will contain an
-// is_monad property for classification.
+// Each unit constructor has a monad prototype. The prototype will contain an
+// is_monad property for classification, as well as all inherited methods.
 
     var prototype = Object.create(null);
     prototype.is_monad = true;
 
-// Each call to MONAD will produce a new unit function.
+// Each call to MONAD will produce a new unit constructor function.
 
     function unit(value) {
 
@@ -54,7 +53,7 @@ function MONAD(modifier) {
         var monad = Object.create(prototype);
 
 // In some mythologies 'bind' is called 'pipe' or '>>='.
-// The bind method that will deliver the unit's value parameter to a function.
+// The bind method will deliver the unit's value parameter to a function.
 
         monad.bind = function (func, args) {
 
@@ -65,8 +64,10 @@ function MONAD(modifier) {
 
 //          return func(value, ...args);
 
-            return func.apply(undefined,
-                [value].concat(Array.prototype.slice.apply(args || [])));
+            return func.apply(
+                undefined,
+                [value].concat(Array.prototype.slice.apply(args || []))
+            );
         };
 
 // If MONAD's modifier parameter is a function, then call it, passing the monad
